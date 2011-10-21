@@ -10,6 +10,7 @@ def angle(genes, x):
         if x < 0:
             return index
 
+
 class Animal(object):
     def __init__(self, x, y, energy, dir, genes):
         self.x = x
@@ -32,7 +33,7 @@ class Animal(object):
         self.energy -= 1
 
     def turn(self):
-        x = random.randint(0, sum(self.genes)-1)
+        x = random.randint(0, sum(self.genes) - 1)
         self.dir += angle(self.genes, x)
         self.dir %= 8
 
@@ -55,6 +56,7 @@ class Animal(object):
     def __repr__(self):
         return 'Animal(x=%(x)s, y=%(y)s, energy=%(energy)s, dir=%(dir)s, genes=%(genes)s)' % vars(self)
 
+
 class World(object):
     WIDTH, HEIGHT = 100, 30
 
@@ -71,8 +73,8 @@ class World(object):
         self.plants = set()
         self.animals = [
             Animal(
-                x=World.WIDTH>>1,
-                y=World.HEIGHT>>1,
+                x=World.WIDTH >> 1,
+                y=World.HEIGHT >> 1,
                 energy=1000,
                 dir=0,
                 genes=[random.randint(1, 9) for i in xrange(8)]
@@ -80,8 +82,8 @@ class World(object):
         ]
 
     def add_random_plant(self, left, top, width, height):
-        pos_x = random.randint(left, left+width-1)
-        pos_y = random.randint(top, top+height-1)
+        pos_x = random.randint(left, left + width - 1)
+        pos_y = random.randint(top, top + height - 1)
         self.plants.add((pos_x, pos_y))
 
     def add_plants(self):
@@ -114,6 +116,14 @@ def draw_world(world, out):
                 out.write(' ')
         out.write('|\n')
 
+
+def print_stats(animals):
+    for animal in animals:
+        print animal
+    print [sum(x) / float(len(world.animals)) for x in itertools.izip(
+        *[animal.genes for animal in world.animals])]
+
+
 def evolution(world):
     try:
         while 1:
@@ -125,10 +135,7 @@ def evolution(world):
             if command.lower() == 'quit':
                 break
             if command.lower() == 'animals':
-                for animal in world.animals:
-                    print animal
-                print [sum(x)/float(len(world.animals)) for x in itertools.izip(
-                            *[animal.genes for animal in world.animals])]
+                print_stats(world.animals)
                 continue
             try:
                 steps = int(command)
@@ -144,7 +151,7 @@ def evolution(world):
     finally:
         pickle.dump(
             [animal.genes for animal in world.animals],
-            file('isle.log', 'wt')
+                                                      file('isle.log', 'wt')
         )
 
 if __name__ == '__main__':
