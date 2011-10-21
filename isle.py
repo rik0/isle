@@ -3,11 +3,14 @@ import random
 import copy
 import sys
 import pickle
+import Tkinter as tk
 
-def angle(genes, x):
+
+def angle(genes):
+    random_seed = random.randint(0, sum(genes) - 1)
     for index, gene in enumerate(genes):
-        x -= gene
-        if x < 0:
+        random_seed -= gene
+        if random_seed < 0:
             return index
 
 
@@ -33,8 +36,7 @@ class Animal(object):
         self.energy -= 1
 
     def turn(self):
-        x = random.randint(0, sum(self.genes) - 1)
-        self.dir += angle(self.genes, x)
+        self.dir += angle(self.genes)
         self.dir %= 8
 
     def eat(self, plants):
@@ -154,7 +156,76 @@ def evolution(world):
                                                       file('isle.log', 'wt')
         )
 
+
+class View(object):
+    ITEM_SIZE = 10
+
+    def __init__(self, root, world):
+        self.world = world
+        self.root = root
+        self.frame = tk.Frame(root)
+
+        self.canvas = tk.Canvas(
+            self.frame,
+            width=World.WIDTH * View.ITEM_SIZE,
+            height=World.HEIGHT * View.ITEM_SIZE)
+        self.canvas.pack()
+
+        self.var = tk.IntVar()
+        self.button = tk.Checkbutton(
+            self.frame,
+            text="Go",
+            variable=self.var,
+            command=self.start
+        )
+        self.button.pack()
+
+        self.frame.pack()
+
+    def should_update(self):
+        return self.var.get() == 1
+
+    def start(self):
+        self.update()
+
+    def update(self):
+        self.world.update()
+        self.update_ui()
+        if self.should_update():
+            self.root.after(View.ITEM_SIZE, self.update)
+
+    def update_ui(self):
+        self.clear_ui()
+        for (plant_x, plant_y) in self.world.plants:
+            plant_x *= View.ITEM_SIZE
+            plant_y *= View.ITEM_SIZE
+            self.canvas.create_oval(
+                plant_x, plant_y, plant_x + View.ITEM_SIZE, plant_y + View.ITEM_SIZE,
+                fill='green'
+            )
+        for animal in self.world.animals:
+            animal_x = animal.x * View.ITEM_SIZE
+            animal_y = animal.y * View.ITEM_SIZE
+            self.canvas.create_oval(
+                animal_x, animal_y, animal_x + View.ITEM_SIZE, animal_y + View.ITEM_SIZE,
+                fill=self.animal_color(animal)
+            )
+
+    def animal_color(self, _animal):
+        # may depend on energy or genes
+        return 'black'
+
+    def clear_ui(self):
+        self.canvas.delete(tk.ALL)
+
 if __name__ == '__main__':
     world = World()
-    evolution(world)
+    if '-gui' in sys.argv:
+        root = tk.Tk()
+        window = View(root, world)
+        root.protocol('WM_DELETE_WINDOW', root.quit)
+        root.mainloop()
+    else:
+        evolution(world)
+
 
