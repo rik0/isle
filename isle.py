@@ -159,18 +159,26 @@ def evolution(world):
 
 class View(object):
     ITEM_SIZE = 10
+    TIME_STEP = 10
 
     def __init__(self, root, world):
         self.world = world
         self.root = root
         self.frame = tk.Frame(root)
 
+        self.create_canvas()
+        self.create_button()
+
+        self.frame.pack()
+
+    def create_canvas(self):
         self.canvas = tk.Canvas(
             self.frame,
             width=World.WIDTH * View.ITEM_SIZE,
             height=World.HEIGHT * View.ITEM_SIZE)
         self.canvas.pack()
 
+    def create_button(self):
         self.var = tk.IntVar()
         self.button = tk.Checkbutton(
             self.frame,
@@ -180,9 +188,7 @@ class View(object):
         )
         self.button.pack()
 
-        self.frame.pack()
-
-    def should_update(self):
+    def should_continue(self):
         return self.var.get() == 1
 
     def start(self):
@@ -191,8 +197,8 @@ class View(object):
     def update(self):
         self.world.update()
         self.update_ui()
-        if self.should_update():
-            self.root.after(View.ITEM_SIZE, self.update)
+        if self.should_continue():
+            self.root.after(View.TIME_STEP, self.update)
 
     def update_ui(self):
         self.clear_ui()
