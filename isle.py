@@ -13,12 +13,13 @@ def add_plants():
     random_plant(*JUNGLE)
     random_plant(*BOARD)
 
-def angle(genes, index, x):
-    xnu = x - genes[index]
-    if xnu < 0:
-        return 0
-    else:
-        return 1 + angle(genes, index+1, xnu)
+def angle(genes, x):
+    for index, gene in enumerate(genes):
+        x -= gene
+        if x < 0:
+            return index
+
+
 
 class Animal(object):
     def __init__(self, x, y, energy, dir, genes):
@@ -43,7 +44,7 @@ class Animal(object):
 
     def turn(self):
         x = random.randint(0, sum(self.genes)-1)
-        self.dir += angle(self.genes, 0, x)
+        self.dir += angle(self.genes, x)
         self.dir %= 8
 
     def eat(self):
